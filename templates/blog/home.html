@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}{{ SITE_NAME }} - Modern Blog Platform{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="bg-gradient-to-br from-sponge-light via-sponge-yellow to-sponge-light dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div class="max-w-3xl mx-auto">
+            <h1 class="text-4xl md:text-6xl font-bold text-sponge-brown dark:text-white mb-6 animate-pulse-slow">
+                Welcome to <span class="text-sponge-brown dark:text-sponge-yellow">Tori's Blog</span>
+            </h1>
+            <p class="text-xl text-sponge-dark dark:text-gray-300 mb-8 leading-relaxed">
+                Discover amazing stories, share your thoughts, and connect with a community of passionate writers and readers.
+            </p>
+            {% if not user.is_authenticated %}
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <a href="{% url 'accounts:register' %}" class="bg-sponge-brown hover:bg-sponge-dark text-white px-8 py-3 rounded-lg font-semibold transition-all transform hover:scale-105 duration-200">
+                        Join Our Community
+                    </a>
+                    <a href="#latest-posts" class="border-2 border-sponge-brown text-sponge-brown hover:bg-sponge-brown hover:text-white px-8 py-3 rounded-lg font-semibold transition-all duration-200">
+                        Explore Posts
+                    </a>
+                </div>
+            {% else %}
+                <a href="{% url 'blog:create_post' %}" class="inline-flex items-center bg-sponge-brown hover:bg-sponge-dark text-white px-8 py-3 rounded-lg font-semibold transition-all transform hover:scale-105 duration-200">
+                    <i class="fas fa-pen mr-2"></i>
+                    Start Writing
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Featured Posts -->
+{% if featured_posts %}
+<section class="py-16 bg-white dark:bg-gray-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                Featured Stories
+            </h2>
+            <p class="text-gray-600 dark:text-gray-400 text-lg">
+                Handpicked stories that deserve your attention
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {% for post in featured_posts %}
+                <div class="group">
+                    {% include 'partials/post_card.html' %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Latest Posts -->
+<section id="latest-posts" class="py-16 bg-gray-50 dark:bg-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center mb-12">
+            <div>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                    Latest Posts
+                </h2>
+                <p class="text-gray-600 dark:text-gray-400 text-lg">
+                    Fresh content from our amazing writers
+                </p>
+            </div>
+            
+            <!-- Genre Filter Buttons -->
+            <div class="hidden lg:flex items-center space-x-2">
+                <a href="{% url 'blog:home' %}" class="px-4 py-2 rounded-lg bg-sponge-yellow text-sponge-brown font-medium hover:bg-sponge-light transition-colors">
+                    All
+                </a>
+                {% for genre in genres|slice:":5" %}
+                    <a href="{% url 'blog:genre_posts' genre.slug %}" class="px-4 py-2 rounded-lg bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-sponge-yellow hover:text-sponge-brown transition-colors">
+                        {{ genre.name }}
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        {% if posts %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {% for post in posts %}
+                    <div class="group">
+                        {% include 'partials/post_card.html' %}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+                <div class="flex justify-center mt-12">
+                    <nav class="flex items-center space-x-2">
+                        {% if page_obj.has_previous %}
+                            <a href="?page={{ page_obj.previous_page_number }}" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-sponge-yellow hover:text-sponge-brown hover:border-sponge-yellow transition-colors">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        {% endif %}
+
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <span class="px-4 py-2 bg-sponge-yellow text-sponge-brown rounded-lg font-medium">
+                                    {{ num }}
+                                </span>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <a href="?page={{ num }}" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-sponge-yellow hover:text-sponge-brown hover:border-sponge-yellow transition-colors">
+                                    {{ num }}
+                                </a>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-sponge-yellow hover:text-sponge-brown hover:border-sponge-yellow transition-colors">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        {% endif %}
+                    </nav>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="text-center py-16">
+                <i class="fas fa-blog text-6xl text-gray-400 dark:text-gray-500 mb-4"></i>
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">No Posts Yet</h3>
+                <p class="text-gray-600 dark:text-gray-400 mb-8">
+                    Be the first to share your story with the community!
+                </p>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'blog:create_post' %}" class="inline-flex items-center bg-sponge-yellow hover:bg-sponge-light text-sponge-brown px-6 py-3 rounded-lg font-medium transition-colors">
+                        <i class="fas fa-pen mr-2"></i>
+                        Write Your First Post
+                    </a>
+                {% else %}
+                    <a href="{% url 'accounts:register' %}" class="inline-flex items-center bg-sponge-yellow hover:bg-sponge-light text-sponge-brown px-6 py-3 rounded-lg font-medium transition-colors">
+                        <i class="fas fa-user-plus mr-2"></i>
+                        Join to Write
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Call to Action -->
+{% if not user.is_authenticated %}
+<section class="bg-sponge-brown dark:bg-gray-900 py-16">
+    <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">
+            Ready to Share Your Story?
+        </h2>
+        <p class="text-sponge-light text-lg mb-8">
+            Join thousands of writers and readers in our thriving community. Your voice matters.
+        </p>
+        <div class="flex flex-col sm:flex-row justify-center gap-4">
+            <a href="{% url 'accounts:register' %}" class="bg-sponge-yellow hover:bg-sponge-light text-sponge-brown px-8 py-3 rounded-lg font-semibold transition-all transform hover:scale-105 duration-200">
+                Create Account
+            </a>
+            <a href="{% url 'accounts:login' %}" class="border-2 border-sponge-yellow text-sponge-yellow hover:bg-sponge-yellow hover:text-sponge-brown px-8 py-3 rounded-lg font-semibold transition-all duration-200">
+                Sign In
+            </a>
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

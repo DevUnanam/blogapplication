@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if object %}Edit Post{% else %}Create Post{% endif %} - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            {% if object %}Edit Your Post{% else %}Create New Post{% endif %}
+        </h1>
+        <p class="text-gray-600 dark:text-gray-400">
+            {% if object %}Update your story and share your latest thoughts.{% else %}Share your story with the world. What's on your mind?{% endif %}
+        </p>
+    </div>
+
+    <!-- Form -->
+    <form method="post" enctype="multipart/form-data" class="bg-white dark:bg-gray-800 shadow-xl rounded-xl p-8">
+        {% csrf_token %}
+        
+        <div class="space-y-6">
+            <!-- Title -->
+            <div>
+                <label for="{{ form.title.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Post Title *
+                </label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.title.errors.0 }}</p>
+                {% endif %}
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">A compelling title that captures your story's essence.</p>
+            </div>
+
+            <!-- Genre -->
+            <div>
+                <label for="{{ form.genre.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Genre/Category *
+                </label>
+                {{ form.genre }}
+                {% if form.genre.errors %}
+                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.genre.errors.0 }}</p>
+                {% endif %}
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Choose the category that best fits your post.</p>
+            </div>
+
+            <!-- Featured Image -->
+            <div>
+                <label for="{{ form.featured_image.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Featured Image
+                </label>
+                {{ form.featured_image }}
+                {% if form.featured_image.errors %}
+                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.featured_image.errors.0 }}</p>
+                {% endif %}
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">An eye-catching image to accompany your post (optional).</p>
+            </div>
+
+            <!-- Excerpt -->
+            <div>
+                <label for="{{ form.excerpt.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Excerpt/Summary
+                </label>
+                {{ form.excerpt }}
+                {% if form.excerpt.errors %}
+                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.excerpt.errors.0 }}</p>
+                {% endif %}
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">A brief summary that will appear in post previews (leave blank for auto-generation).</p>
+            </div>
+
+            <!-- Content -->
+            <div>
+                <label for="{{ form.content.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Content *
+                </label>
+                {{ form.content }}
+                {% if form.content.errors %}
+                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.content.errors.0 }}</p>
+                {% endif %}
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Write your story here. Support for markdown and HTML formatting.</p>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-between">
+            <div class="flex gap-3">
+                <button type="submit" class="bg-sponge-yellow hover:bg-sponge-light text-sponge-brown px-6 py-3 rounded-lg font-semibold transition-all transform hover:scale-105 duration-200 flex items-center">
+                    <i class="fas fa-save mr-2"></i>
+                    {% if object %}Update Post{% else %}Publish Post{% endif %}
+                </button>
+                
+                <!-- Save as Draft (if implementing drafts) -->
+                <button type="button" onclick="saveDraft()" class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 px-6 py-3 rounded-lg font-semibold transition-colors flex items-center">
+                    <i class="fas fa-file-alt mr-2"></i>
+                    Save Draft
+                </button>
+            </div>
+            
+            <div class="flex gap-3">
+                {% if object %}
+                    <a href="{{ object.get_absolute_url }}" class="bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-400 px-6 py-3 rounded-lg font-semibold transition-colors flex items-center">
+                        <i class="fas fa-eye mr-2"></i>
+                        Preview
+                    </a>
+                {% endif %}
+                
+                <a href="{% url 'blog:home' %}" class="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 px-6 py-3 rounded-lg font-semibold transition-colors flex items-center">
+                    <i class="fas fa-times mr-2"></i>
+                    Cancel
+                </a>
+            </div>
+        </div>
+    </form>
+
+    <!-- Writing Tips -->
+    <div class="mt-8 bg-sponge-light dark:bg-gray-800 border border-sponge-yellow dark:border-gray-600 rounded-xl p-6">
+        <h3 class="text-lg font-semibold text-sponge-brown dark:text-sponge-yellow mb-4">
+            <i class="fas fa-lightbulb mr-2"></i>
+            Writing Tips
+        </h3>
+        <ul class="space-y-2 text-sponge-dark dark:text-gray-300">
+            <li class="flex items-start">
+                <i class="fas fa-check-circle text-sponge-brown mt-1 mr-2 text-sm"></i>
+                <span>Write a compelling title that makes people want to read more</span>
+            </li>
+            <li class="flex items-start">
+                <i class="fas fa-check-circle text-sponge-brown mt-1 mr-2 text-sm"></i>
+                <span>Choose the right genre to help readers find your content</span>
+            </li>
+            <li class="flex items-start">
+                <i class="fas fa-check-circle text-sponge-brown mt-1 mr-2 text-sm"></i>
+                <span>Add a featured image to make your post more visually appealing</span>
+            </li>
+            <li class="flex items-start">
+                <i class="fas fa-check-circle text-sponge-brown mt-1 mr-2 text-sm"></i>
+                <span>Write a clear excerpt to give readers a preview of your content</span>
+            </li>
+            <li class="flex items-start">
+                <i class="fas fa-check-circle text-sponge-brown mt-1 mr-2 text-sm"></i>
+                <span>Break up your content with paragraphs for better readability</span>
+            </li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function saveDraft() {
+    // Placeholder for draft saving functionality
+    alert('Draft saving functionality would be implemented here');
+}
+
+// Auto-save functionality (optional)
+let autoSaveTimer;
+const formElements = document.querySelectorAll('input, textarea, select');
+
+formElements.forEach(element => {
+    element.addEventListener('input', () => {
+        clearTimeout(autoSaveTimer);
+        autoSaveTimer = setTimeout(() => {
+            // Auto-save logic would go here
+            console.log('Auto-saving...');
+        }, 30000); // Auto-save every 30 seconds
+    });
+});
+
+// Character counter for excerpt
+const excerptField = document.getElementById('{{ form.excerpt.id_for_label }}');
+if (excerptField) {
+    const maxLength = 300;
+    
+    function updateCounter() {
+        const length = excerptField.value.length;
+        const remaining = maxLength - length;
+        
+        let counter = document.getElementById('excerpt-counter');
+        if (!counter) {
+            counter = document.createElement('p');
+            counter.id = 'excerpt-counter';
+            counter.className = 'mt-1 text-sm';
+            excerptField.parentNode.appendChild(counter);
+        }
+        
+        counter.textContent = `${remaining} characters remaining`;
+        counter.className = `mt-1 text-sm ${remaining < 50 ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'}`;
+    }
+    
+    excerptField.addEventListener('input', updateCounter);
+    updateCounter(); // Initial call
+}
+</script>
+{% endblock %}

@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}{{ profile_user.first_name }} {{ profile_user.last_name|default:profile_user.username }} - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<!-- Profile Header -->
+<section class="bg-gradient-to-br from-sponge-yellow to-sponge-light dark:from-gray-800 dark:to-gray-700 py-16">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+            <!-- Avatar -->
+            <div class="mb-6">
+                <img src="{{ profile_user.profile.get_avatar_url }}" alt="{{ profile_user.username }}" class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-xl mx-auto">
+            </div>
+            
+            <!-- Name & Bio -->
+            <h1 class="text-3xl md:text-4xl font-bold text-sponge-brown dark:text-white mb-4">
+                {{ profile_user.first_name }} {{ profile_user.last_name|default:profile_user.username }}
+            </h1>
+            
+            {% if profile_user.profile.bio %}
+                <p class="text-lg text-sponge-dark dark:text-gray-300 mb-6 max-w-2xl mx-auto">
+                    {{ profile_user.profile.bio }}
+                </p>
+            {% endif %}
+            
+            <!-- User Meta -->
+            <div class="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-6 text-sponge-dark dark:text-gray-300">
+                {% if profile_user.profile.location %}
+                    <div class="flex items-center">
+                        <i class="fas fa-map-marker-alt mr-2"></i>
+                        <span>{{ profile_user.profile.location }}</span>
+                    </div>
+                {% endif %}
+                
+                {% if profile_user.profile.website %}
+                    <div class="flex items-center">
+                        <i class="fas fa-link mr-2"></i>
+                        <a href="{{ profile_user.profile.website }}" target="_blank" class="hover:text-sponge-brown dark:hover:text-sponge-yellow transition-colors">
+                            Website
+                        </a>
+                    </div>
+                {% endif %}
+                
+                <div class="flex items-center">
+                    <i class="fas fa-calendar mr-2"></i>
+                    <span>Joined {{ profile_user.date_joined|date:"F Y" }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats & Actions -->
+<section class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="flex flex-col md:flex-row items-center justify-between">
+            <!-- Stats -->
+            <div class="flex items-center space-x-8 mb-4 md:mb-0">
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ profile_user.profile.posts_count }}</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">Post{{ profile_user.profile.posts_count|pluralize }}</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-gray-900 dark:text-white" id="follower-count">{{ profile_user.profile.followers_count }}</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">Follower{{ profile_user.profile.followers_count|pluralize }}</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ profile_user.profile.following_count }}</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">Following</div>
+                </div>
+            </div>
+            
+            <!-- Actions -->
+            <div class="flex items-center space-x-3">
+                {% if user.is_authenticated and user != profile_user %}
+                    <button onclick="followUser('{{ profile_user.username }}')" id="follow-btn" class="px-6 py-2 rounded-lg font-medium transition-all">
+                        {% if is_following %}
+                            <span class="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">Following</span>
+                        {% else %}
+                            <span class="bg-sponge-yellow text-sponge-brown">Follow</span>
+                        {% endif %}
+                    </button>
+                {% endif %}
+                
+                {% if user == profile_user %}
+                    <a href="{% url 'accounts:edit_profile' %}" class="px-6 py-2 bg-sponge-yellow hover:bg-sponge-light text-sponge-brown rounded-lg font-medium transition-colors">
+                        <i class="fas fa-edit mr-2"></i>
+                        Edit Profile
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- User Posts -->
+<section class="py-12 bg-gray-50 dark:bg-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="mb-8">
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                Recent Posts
+            </h2>
+            <p class="text-gray-600 dark:text-gray-400">
+                Stories shared by {{ profile_user.first_name|default:profile_user.username }}
+            </p>
+        </div>
+        
+        {% if posts %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {% for post in posts %}
+                    <div class="group">
+                        {% include 'partials/post_card.html' %}
+                    </div>
+                {% endfor %}
+            </div>
+            
+            {% if profile_user.profile.posts_count > 10 %}
+                <div class="text-center mt-12">
+                    <a href="{% url 'blog:genre_posts' 'all' %}?author={{ profile_user.username }}" class="inline-flex items-center bg-sponge-yellow hover:bg-sponge-light text-sponge-brown px-6 py-3 rounded-lg font-medium transition-colors">
+                        View All Posts
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="text-center py-16">
+                <i class="fas fa-pen-alt text-6xl text-gray-400 dark:text-gray-500 mb-4"></i>
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                    {% if user == profile_user %}
+                        You Haven't Posted Anything Yet
+                    {% else %}
+                        No Posts Yet
+                    {% endif %}
+                </h3>
+                <p class="text-gray-600 dark:text-gray-400 mb-8">
+                    {% if user == profile_user %}
+                        Start sharing your stories with the community!
+                    {% else %}
+                        {{ profile_user.first_name|default:profile_user.username }} hasn't shared any stories yet.
+                    {% endif %}
+                </p>
+                {% if user == profile_user %}
+                    <a href="{% url 'blog:create_post' %}" class="inline-flex items-center bg-sponge-yellow hover:bg-sponge-light text-sponge-brown px-6 py-3 rounded-lg font-medium transition-colors">
+                        <i class="fas fa-pen mr-2"></i>
+                        Write Your First Post
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize follow button state
+    const followBtn = document.getElementById('follow-btn');
+    if (followBtn) {
+        const isFollowing = {{ is_following|yesno:"true,false" }};
+        updateFollowButton(isFollowing);
+    }
+});
+
+function updateFollowButton(isFollowing) {
+    const followBtn = document.getElementById('follow-btn');
+    if (isFollowing) {
+        followBtn.className = 'px-6 py-2 rounded-lg font-medium transition-all bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300';
+        followBtn.textContent = 'Following';
+    } else {
+        followBtn.className = 'px-6 py-2 rounded-lg font-medium transition-all bg-sponge-yellow text-sponge-brown';
+        followBtn.textContent = 'Follow';
+    }
+}
+</script>
+{% endblock %}

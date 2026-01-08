@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Delete Post - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <i class="fas fa-exclamation-triangle text-6xl text-red-500 mb-4"></i>
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+            Delete Post
+        </h1>
+        <p class="text-gray-600 dark:text-gray-400">
+            This action cannot be undone
+        </p>
+    </div>
+
+    <!-- Post Preview -->
+    <div class="bg-white dark:bg-gray-800 shadow-xl rounded-xl p-8 mb-8">
+        <div class="border-l-4 border-red-500 pl-6">
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                {{ post.title }}
+            </h2>
+            <p class="text-gray-600 dark:text-gray-400 mb-4">
+                {{ post.excerpt|default:post.content|truncatewords:20 }}
+            </p>
+            <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+                <div class="flex items-center space-x-4">
+                    <span>Published {{ post.created_at|timesince }} ago</span>
+                    <span>{{ post.genre.name }}</span>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <span>{{ post.likes_count }} like{{ post.likes_count|pluralize }}</span>
+                    <span>{{ post.comments_count }} comment{{ post.comments_count|pluralize }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Form -->
+    <form method="post" class="bg-white dark:bg-gray-800 shadow-xl rounded-xl p-8">
+        {% csrf_token %}
+        
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Are you absolutely sure?
+            </h3>
+            <p class="text-gray-600 dark:text-gray-400 mb-4">
+                Deleting this post will permanently remove it from Tori's Blog. This includes:
+            </p>
+            <ul class="list-disc list-inside space-y-1 text-gray-600 dark:text-gray-400 mb-6">
+                <li>The post content and all metadata</li>
+                <li>All comments and replies on this post</li>
+                <li>All likes and interactions</li>
+                <li>Any analytics data for this post</li>
+            </ul>
+            
+            <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                <div class="flex">
+                    <i class="fas fa-exclamation-triangle text-red-500 mt-1 mr-3"></i>
+                    <div>
+                        <h4 class="text-red-800 dark:text-red-400 font-medium">Warning</h4>
+                        <p class="text-red-700 dark:text-red-300 text-sm mt-1">
+                            This action is permanent and cannot be undone. Please be certain before proceeding.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-between">
+            <div class="flex gap-3">
+                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 flex items-center">
+                    <i class="fas fa-trash mr-2"></i>
+                    Yes, Delete This Post
+                </button>
+            </div>
+            
+            <div class="flex gap-3">
+                <a href="{{ post.get_absolute_url }}" class="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 px-6 py-3 rounded-lg font-semibold transition-colors flex items-center">
+                    <i class="fas fa-times mr-2"></i>
+                    Cancel
+                </a>
+                <a href="{% url 'blog:edit_post' post.slug %}" class="bg-sponge-yellow hover:bg-sponge-light text-sponge-brown px-6 py-3 rounded-lg font-semibold transition-colors flex items-center">
+                    <i class="fas fa-edit mr-2"></i>
+                    Edit Instead
+                </a>
+            </div>
+        </div>
+    </form>
+
+    <!-- Alternative Actions -->
+    <div class="mt-8 text-center">
+        <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">
+            Looking for other options?
+        </p>
+        <div class="space-y-2">
+            <a href="{% url 'blog:user_profile' user.username %}" class="block text-sponge-brown dark:text-sponge-yellow hover:underline">
+                View all your posts
+            </a>
+            <a href="{% url 'blog:create_post' %}" class="block text-sponge-brown dark:text-sponge-yellow hover:underline">
+                Write a new post instead
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Confirm before deletion
+document.querySelector('form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const confirmation = confirm('Are you absolutely sure you want to delete this post? This action cannot be undone.');
+    
+    if (confirmation) {
+        const doubleConfirmation = confirm('Last chance! This will permanently delete your post and all associated data. Are you sure?');
+        if (doubleConfirmation) {
+            this.submit();
+        }
+    }
+});
+
+// Add warning style to delete button on hover
+const deleteButton = document.querySelector('button[type="submit"]');
+deleteButton.addEventListener('mouseenter', function() {
+    this.classList.add('animate-pulse');
+});
+
+deleteButton.addEventListener('mouseleave', function() {
+    this.classList.remove('animate-pulse');
+});
+</script>
+{% endblock %}

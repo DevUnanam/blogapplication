@@ -1,0 +1,56 @@
+<!-- Post Card Component -->
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden">
+    {% if post.featured_image %}
+        <div class="aspect-w-16 aspect-h-9 overflow-hidden">
+            <img src="{{ post.featured_image.url }}" alt="{{ post.title }}" class="w-full h-48 object-cover hover:scale-105 transition-transform duration-300">
+        </div>
+    {% endif %}
+    
+    <div class="p-6">
+        <!-- Genre Badge -->
+        <div class="mb-3">
+            <a href="{% url 'blog:genre_posts' post.genre.slug %}" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-sponge-light text-sponge-brown hover:bg-sponge-yellow transition-colors">
+                {{ post.genre.name }}
+            </a>
+        </div>
+        
+        <!-- Title -->
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3 line-clamp-2 hover:text-sponge-brown dark:hover:text-sponge-yellow transition-colors">
+            <a href="{{ post.get_absolute_url }}" class="hover:underline">{{ post.title }}</a>
+        </h3>
+        
+        <!-- Excerpt -->
+        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-3">
+            {{ post.excerpt|default:post.content|truncatewords:20 }}
+        </p>
+        
+        <!-- Author & Meta Info -->
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <a href="{% url 'blog:user_profile' post.author.username %}" class="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+                    <img src="{{ post.author.profile.get_avatar_url }}" alt="{{ post.author.username }}" class="w-8 h-8 rounded-full object-cover">
+                    <div>
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">
+                            {{ post.author.first_name }} {{ post.author.last_name|default:post.author.username }}
+                        </p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                            {{ post.created_at|timesince }} ago
+                        </p>
+                    </div>
+                </a>
+            </div>
+            
+            <!-- Interaction Stats -->
+            <div class="flex items-center space-x-3 text-gray-500 dark:text-gray-400">
+                <div class="flex items-center space-x-1">
+                    <i class="far fa-heart text-xs"></i>
+                    <span class="text-xs">{{ post.likes_count }}</span>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <i class="far fa-comment text-xs"></i>
+                    <span class="text-xs">{{ post.comments_count }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

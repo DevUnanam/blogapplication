@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en" class="{{ theme_mode }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ SITE_NAME }}{% endblock %}</title>
+    <meta name="description" content="{% block description %}{{ SITE_DESCRIPTION }}{% endblock %}">
+    {% load static %}
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'sponge-yellow': '#FFD90F',
+                        'sponge-brown': '#6B4F1D',
+                        'sponge-light': '#FFF4B8',
+                        'sponge-dark': '#4A3015',
+                    },
+                    fontFamily: {
+                        'heading': ['Inter', 'sans-serif'],
+                        'body': ['Inter', 'sans-serif'],
+                    },
+                    animation: {
+                        'bounce-slow': 'bounce 2s infinite',
+                        'pulse-slow': 'pulse 3s infinite',
+                        'wiggle': 'wiggle 1s ease-in-out infinite',
+                        'like': 'like 0.3s ease-in-out',
+                    },
+                    keyframes: {
+                        wiggle: {
+                            '0%, 100%': { transform: 'rotate(-3deg)' },
+                            '50%': { transform: 'rotate(3deg)' },
+                        },
+                        like: {
+                            '0%': { transform: 'scale(1)' },
+                            '50%': { transform: 'scale(1.2)' },
+                            '100%': { transform: 'scale(1)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-body transition-colors duration-300">
+    
+    {% include 'partials/navbar.html' %}
+    
+    <!-- Messages -->
+    {% if messages %}
+        <div class="fixed top-20 right-4 z-50 space-y-2" id="messages">
+            {% for message in messages %}
+                <div class="max-w-sm mx-auto bg-white dark:bg-gray-800 border-l-4 
+                           {% if message.tags == 'success' %}border-green-500 text-green-700 dark:text-green-400{% endif %}
+                           {% if message.tags == 'error' %}border-red-500 text-red-700 dark:text-red-400{% endif %}
+                           {% if message.tags == 'warning' %}border-yellow-500 text-yellow-700 dark:text-yellow-400{% endif %}
+                           {% if message.tags == 'info' %}border-blue-500 text-blue-700 dark:text-blue-400{% endif %}
+                           p-4 rounded-lg shadow-lg transform transition-all duration-300 ease-in-out" 
+                     data-message>
+                    <div class="flex items-center justify-between">
+                        <p class="font-medium">{{ message }}</p>
+                        <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="min-h-screen pt-16">
+        {% block content %}{% endblock %}
+    </main>
+
+    {% include 'partials/footer.html' %}
+
+    <!-- Custom JavaScript -->
+    <script src="{% static 'js/main.js' %}"></script>
+    
+    {% block extra_js %}{% endblock %}
+
+    <!-- Auto-hide messages -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const messages = document.querySelectorAll('[data-message]');
+            messages.forEach(function(message) {
+                setTimeout(function() {
+                    if (message.parentNode) {
+                        message.style.transform = 'translateX(100%)';
+                        setTimeout(function() {
+                            if (message.parentNode) {
+                                message.remove();
+                            }
+                        }, 300);
+                    }
+                }, 5000);
+            });
+        });
+    </script>
+</body>
+</html>

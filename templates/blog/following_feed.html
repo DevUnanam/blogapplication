@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Following Feed - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<section class="bg-gradient-to-r from-sponge-yellow to-sponge-light dark:from-gray-800 dark:to-gray-700 py-16">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h1 class="text-3xl md:text-4xl font-bold text-sponge-brown dark:text-white mb-4">
+            <i class="fas fa-users mr-3"></i>
+            Following Feed
+        </h1>
+        <p class="text-lg text-sponge-dark dark:text-gray-300">
+            Latest posts from writers you follow
+        </p>
+    </div>
+</section>
+
+<!-- Content -->
+<section class="py-12 bg-gray-50 dark:bg-gray-800">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        {% if posts %}
+            <div class="space-y-8">
+                {% for post in posts %}
+                    <article class="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
+                        {% if post.featured_image %}
+                            <div class="aspect-w-16 aspect-h-9 overflow-hidden">
+                                <img src="{{ post.featured_image.url }}" alt="{{ post.title }}" class="w-full h-64 object-cover hover:scale-105 transition-transform duration-300">
+                            </div>
+                        {% endif %}
+                        
+                        <div class="p-6">
+                            <!-- Genre & Date -->
+                            <div class="flex items-center justify-between mb-4">
+                                <a href="{% url 'blog:genre_posts' post.genre.slug %}" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-sponge-light text-sponge-brown hover:bg-sponge-yellow transition-colors">
+                                    {{ post.genre.name }}
+                                </a>
+                                <span class="text-sm text-gray-500 dark:text-gray-400">
+                                    {{ post.created_at|timesince }} ago
+                                </span>
+                            </div>
+                            
+                            <!-- Title -->
+                            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 hover:text-sponge-brown dark:hover:text-sponge-yellow transition-colors">
+                                <a href="{{ post.get_absolute_url }}">{{ post.title }}</a>
+                            </h2>
+                            
+                            <!-- Excerpt -->
+                            <p class="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
+                                {{ post.excerpt|default:post.content|truncatewords:30 }}
+                            </p>
+                            
+                            <!-- Author & Actions -->
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <a href="{% url 'blog:user_profile' post.author.username %}" class="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+                                        <img src="{{ post.author.profile.get_avatar_url }}" alt="{{ post.author.username }}" class="w-10 h-10 rounded-full object-cover border-2 border-sponge-yellow">
+                                        <div>
+                                            <p class="font-semibold text-gray-900 dark:text-white">
+                                                {{ post.author.first_name }} {{ post.author.last_name|default:post.author.username }}
+                                            </p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">
+                                                @{{ post.author.username }}
+                                            </p>
+                                        </div>
+                                    </a>
+                                </div>
+                                
+                                <!-- Stats & Actions -->
+                                <div class="flex items-center space-x-4">
+                                    <div class="flex items-center space-x-3 text-gray-500 dark:text-gray-400">
+                                        <div class="flex items-center space-x-1">
+                                            <i class="far fa-heart text-sm"></i>
+                                            <span class="text-sm">{{ post.likes_count }}</span>
+                                        </div>
+                                        <div class="flex items-center space-x-1">
+                                            <i class="far fa-comment text-sm"></i>
+                                            <span class="text-sm">{{ post.comments_count }}</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <a href="{{ post.get_absolute_url }}" class="bg-sponge-yellow hover:bg-sponge-light text-sponge-brown px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                                        Read More
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+                <div class="flex justify-center mt-12">
+                    <nav class="flex items-center space-x-2">
+                        {% if page_obj.has_previous %}
+                            <a href="?page={{ page_obj.previous_page_number }}" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-sponge-yellow hover:text-sponge-brown hover:border-sponge-yellow transition-colors">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        {% endif %}
+
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <span class="px-4 py-2 bg-sponge-yellow text-sponge-brown rounded-lg font-medium">
+                                    {{ num }}
+                                </span>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <a href="?page={{ num }}" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-sponge-yellow hover:text-sponge-brown hover:border-sponge-yellow transition-colors">
+                                    {{ num }}
+                                </a>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-sponge-yellow hover:text-sponge-brown hover:border-sponge-yellow transition-colors">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        {% endif %}
+                    </nav>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="text-center py-16">
+                <i class="fas fa-user-friends text-6xl text-gray-400 dark:text-gray-500 mb-6"></i>
+                <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                    Your Feed is Empty
+                </h2>
+                <p class="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
+                    Follow some amazing writers to see their latest posts here. Discover new voices and stories!
+                </p>
+                
+                <!-- Suggestions -->
+                <div class="space-y-4">
+                    <a href="{% url 'blog:home' %}" class="inline-flex items-center bg-sponge-yellow hover:bg-sponge-light text-sponge-brown px-6 py-3 rounded-lg font-medium transition-colors">
+                        <i class="fas fa-compass mr-2"></i>
+                        Explore All Posts
+                    </a>
+                    
+                    <div class="text-sm text-gray-500 dark:text-gray-400">
+                        Browse posts by genre to find writers you'd like to follow
+                    </div>
+                    
+                    <!-- Genre Quick Links -->
+                    <div class="flex flex-wrap justify-center gap-2 mt-4">
+                        {% for genre in genres|slice:":6" %}
+                            <a href="{% url 'blog:genre_posts' genre.slug %}" class="px-3 py-1 bg-gray-100 dark:bg-gray-700 hover:bg-sponge-yellow hover:text-sponge-brown text-gray-700 dark:text-gray-300 rounded-full text-xs transition-colors">
+                                {{ genre.name }}
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

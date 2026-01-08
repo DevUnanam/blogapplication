@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Login - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-sponge-light to-sponge-yellow dark:from-gray-800 dark:to-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <!-- Header -->
+        <div class="text-center">
+            <div class="flex justify-center mb-6">
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-full shadow-lg">
+                    <i class="fas fa-blog text-4xl text-sponge-brown"></i>
+                </div>
+            </div>
+            <h2 class="text-3xl font-bold text-sponge-brown dark:text-white mb-2">
+                Welcome back!
+            </h2>
+            <p class="text-sponge-dark dark:text-gray-300">
+                Sign in to your account to continue writing and reading amazing stories.
+            </p>
+        </div>
+
+        <!-- Login Form -->
+        <form method="post" class="bg-white dark:bg-gray-800 shadow-xl rounded-xl p-8 space-y-6">
+            {% csrf_token %}
+            
+            <!-- Username -->
+            <div>
+                <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Username
+                </label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-user text-gray-400"></i>
+                    </div>
+                    {{ form.username }}
+                </div>
+                {% if form.username.errors %}
+                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.username.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Password -->
+            <div>
+                <label for="{{ form.password.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Password
+                </label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-lock text-gray-400"></i>
+                    </div>
+                    {{ form.password }}
+                </div>
+                {% if form.password.errors %}
+                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.password.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Submit Button -->
+            <div>
+                <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-sponge-brown bg-sponge-yellow hover:bg-sponge-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sponge-yellow transition-all transform hover:scale-105 duration-200">
+                    <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+                        <i class="fas fa-sign-in-alt group-hover:text-sponge-dark"></i>
+                    </span>
+                    Sign in
+                </button>
+            </div>
+
+            <!-- Links -->
+            <div class="text-center space-y-2">
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                    Don't have an account?
+                    <a href="{% url 'accounts:register' %}" class="font-medium text-sponge-brown hover:text-sponge-dark dark:text-sponge-yellow dark:hover:text-sponge-light transition-colors">
+                        Sign up here
+                    </a>
+                </p>
+            </div>
+        </form>
+
+        <!-- Alternative Actions -->
+        <div class="text-center">
+            <a href="{% url 'blog:home' %}" class="text-sm text-gray-500 dark:text-gray-400 hover:text-sponge-brown dark:hover:text-sponge-yellow transition-colors">
+                ← Back to home
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

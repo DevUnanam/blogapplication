@@ -1,0 +1,255 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}{{ post.title }} - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<article class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Post Header -->
+    <header class="mb-8">
+        <!-- Genre Badge -->
+        <div class="mb-4">
+            <a href="{% url 'blog:genre_posts' post.genre.slug %}" class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-sponge-light text-sponge-brown hover:bg-sponge-yellow transition-colors">
+                {{ post.genre.name }}
+            </a>
+        </div>
+        
+        <!-- Title -->
+        <h1 class="text-3xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
+            {{ post.title }}
+        </h1>
+        
+        <!-- Author Info & Meta -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 pb-8 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center space-x-4 mb-4 sm:mb-0">
+                <a href="{% url 'blog:user_profile' post.author.username %}" class="flex items-center space-x-3 hover:opacity-80 transition-opacity">
+                    <img src="{{ post.author.profile.get_avatar_url }}" alt="{{ post.author.username }}" class="w-12 h-12 rounded-full object-cover border-2 border-sponge-yellow">
+                    <div>
+                        <h3 class="font-semibold text-gray-900 dark:text-white">
+                            {{ post.author.first_name }} {{ post.author.last_name|default:post.author.username }}
+                        </h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            Published {{ post.created_at|timesince }} ago
+                            {% if post.updated_at != post.created_at %}
+                                • Updated {{ post.updated_at|timesince }} ago
+                            {% endif %}
+                        </p>
+                    </div>
+                </a>
+                
+                <!-- Follow Button -->
+                {% if user.is_authenticated and user != post.author %}
+                    <button onclick="followUser('{{ post.author.username }}')" id="follow-btn" class="px-4 py-2 rounded-lg font-medium text-sm transition-all">
+                        <!-- Will be populated by JavaScript -->
+                    </button>
+                {% endif %}
+            </div>
+            
+            <!-- Post Actions -->
+            <div class="flex items-center space-x-4">
+                <!-- Like Button -->
+                {% if user.is_authenticated %}
+                    <button onclick="likePost('{{ post.slug }}')" id="like-btn" class="flex items-center space-x-2 px-4 py-2 rounded-lg transition-all hover:scale-105 transform duration-200">
+                        <i id="like-icon" class="fas fa-heart text-lg"></i>
+                        <span id="like-count">{{ post.likes_count }}</span>
+                    </button>
+                {% else %}
+                    <div class="flex items-center space-x-2 text-gray-500 dark:text-gray-400">
+                        <i class="far fa-heart text-lg"></i>
+                        <span>{{ post.likes_count }}</span>
+                    </div>
+                {% endif %}
+                
+                <!-- Share Button -->
+                <button onclick="sharePost()" class="flex items-center space-x-2 px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-sponge-yellow hover:text-sponge-brown transition-colors">
+                    <i class="fas fa-share text-sm"></i>
+                    <span>Share</span>
+                </button>
+                
+                <!-- Edit/Delete for Author -->
+                {% if user == post.author %}
+                    <div class="flex items-center space-x-2">
+                        <a href="{% url 'blog:edit_post' post.slug %}" class="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="{% url 'blog:delete_post' post.slug %}" class="p-2 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Featured Image -->
+    {% if post.featured_image %}
+        <div class="mb-8 rounded-xl overflow-hidden">
+            <img src="{{ post.featured_image.url }}" alt="{{ post.title }}" class="w-full h-64 md:h-96 object-cover">
+        </div>
+    {% endif %}
+
+    <!-- Post Content -->
+    <div class="prose prose-lg dark:prose-invert max-w-none mb-12">
+        {{ post.content|linebreaks }}
+    </div>
+
+    <!-- Comments Section -->
+    <section class="border-t border-gray-200 dark:border-gray-700 pt-8">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+            Comments ({{ comments.count }})
+        </h2>
+
+        <!-- Add Comment Form -->
+        {% if user.is_authenticated %}
+            <form method="post" action="{% url 'blog:add_comment' post.slug %}" class="mb-8 bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                {% csrf_token %}
+                <div class="flex items-start space-x-4">
+                    <img src="{{ user.profile.get_avatar_url }}" alt="{{ user.username }}" class="w-10 h-10 rounded-full object-cover">
+                    <div class="flex-1">
+                        {{ comment_form.content }}
+                        <div class="mt-3">
+                            <button type="submit" class="bg-sponge-yellow hover:bg-sponge-light text-sponge-brown px-6 py-2 rounded-lg font-medium transition-colors">
+                                Post Comment
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        {% else %}
+            <div class="mb-8 bg-gray-50 dark:bg-gray-800 p-6 rounded-lg text-center">
+                <p class="text-gray-600 dark:text-gray-400 mb-4">Join the conversation!</p>
+                <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="bg-sponge-yellow hover:bg-sponge-light text-sponge-brown px-6 py-2 rounded-lg font-medium transition-colors">
+                    Login to Comment
+                </a>
+            </div>
+        {% endif %}
+
+        <!-- Comments List -->
+        <div class="space-y-6">
+            {% for comment in comments %}
+                {% include 'partials/comment.html' with comment=comment %}
+            {% empty %}
+                <div class="text-center py-8">
+                    <i class="fas fa-comments text-4xl text-gray-400 dark:text-gray-500 mb-4"></i>
+                    <p class="text-gray-600 dark:text-gray-400">No comments yet. Be the first to share your thoughts!</p>
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+</article>
+
+<!-- Related Posts -->
+{% if related_posts %}
+<section class="bg-gray-50 dark:bg-gray-800 py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">
+            More from {{ post.genre.name }}
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {% for related_post in related_posts %}
+                {% include 'partials/post_card.html' with post=related_post %}
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize like button state
+    {% if user.is_authenticated %}
+        updateLikeButton({{ user_has_liked|yesno:"true,false" }});
+        
+        // Initialize follow button state
+        {% if user != post.author %}
+            // This would be populated via AJAX or context
+            // For now, we'll use a simple check
+        {% endif %}
+    {% endif %}
+});
+
+async function likePost(slug) {
+    try {
+        const response = await fetch(`/ajax/like-post/${slug}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json',
+            },
+        });
+        
+        const data = await response.json();
+        document.getElementById('like-count').textContent = data.likes_count;
+        updateLikeButton(data.liked);
+        
+        // Add animation
+        const likeBtn = document.getElementById('like-btn');
+        likeBtn.classList.add('animate-like');
+        setTimeout(() => likeBtn.classList.remove('animate-like'), 300);
+        
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+function updateLikeButton(isLiked) {
+    const likeBtn = document.getElementById('like-btn');
+    const likeIcon = document.getElementById('like-icon');
+    
+    if (isLiked) {
+        likeBtn.className = 'flex items-center space-x-2 px-4 py-2 rounded-lg transition-all hover:scale-105 transform duration-200 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400';
+        likeIcon.className = 'fas fa-heart text-lg';
+    } else {
+        likeBtn.className = 'flex items-center space-x-2 px-4 py-2 rounded-lg transition-all hover:scale-105 transform duration-200 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300';
+        likeIcon.className = 'far fa-heart text-lg';
+    }
+}
+
+async function followUser(username) {
+    try {
+        const response = await fetch(`/ajax/follow/${username}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json',
+            },
+        });
+        
+        const data = await response.json();
+        updateFollowButton(data.following);
+        
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+function updateFollowButton(isFollowing) {
+    const followBtn = document.getElementById('follow-btn');
+    if (isFollowing) {
+        followBtn.className = 'px-4 py-2 rounded-lg font-medium text-sm transition-all bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300';
+        followBtn.textContent = 'Following';
+    } else {
+        followBtn.className = 'px-4 py-2 rounded-lg font-medium text-sm transition-all bg-sponge-yellow text-sponge-brown';
+        followBtn.textContent = 'Follow';
+    }
+}
+
+function sharePost() {
+    if (navigator.share) {
+        navigator.share({
+            title: '{{ post.title }}',
+            text: '{{ post.excerpt|default:post.content|truncatewords:20 }}',
+            url: window.location.href
+        });
+    } else {
+        // Fallback: copy to clipboard
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            alert('Link copied to clipboard!');
+        });
+    }
+}
+</script>
+{% endblock %}

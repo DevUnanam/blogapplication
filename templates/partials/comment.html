@@ -1,0 +1,175 @@
+<!-- Comment Component with Nested Replies -->
+<div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg p-6 mb-4" id="comment-{{ comment.id }}">
+    <!-- Comment Header -->
+    <div class="flex items-start space-x-4">
+        <a href="{% url 'blog:user_profile' comment.author.username %}" class="flex-shrink-0">
+            <img src="{{ comment.author.profile.get_avatar_url }}" alt="{{ comment.author.username }}" class="w-10 h-10 rounded-full object-cover border-2 border-sponge-yellow">
+        </a>
+        
+        <div class="flex-1">
+            <!-- Comment Meta -->
+            <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center space-x-2">
+                    <a href="{% url 'blog:user_profile' comment.author.username %}" class="font-semibold text-gray-900 dark:text-white hover:text-sponge-brown dark:hover:text-sponge-yellow transition-colors">
+                        {{ comment.author.first_name }} {{ comment.author.last_name|default:comment.author.username }}
+                    </a>
+                    <span class="text-gray-500 dark:text-gray-400 text-sm">
+                        {{ comment.created_at|timesince }} ago
+                    </span>
+                    {% if comment.updated_at != comment.created_at %}
+                        <span class="text-gray-400 dark:text-gray-500 text-xs">
+                            (edited)
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Comment Content -->
+            <div class="prose prose-sm dark:prose-invert max-w-none mb-4">
+                {{ comment.content|linebreaks }}
+            </div>
+            
+            <!-- Comment Actions -->
+            <div class="flex items-center space-x-4">
+                {% if user.is_authenticated %}
+                    <!-- Like Comment -->
+                    <button onclick="likeComment({{ comment.id }})" id="comment-like-{{ comment.id }}" class="flex items-center space-x-1 text-gray-500 dark:text-gray-400 hover:text-red-500 transition-colors">
+                        <i id="comment-like-icon-{{ comment.id }}" class="far fa-heart"></i>
+                        <span id="comment-like-count-{{ comment.id }}">{{ comment.likes_count }}</span>
+                    </button>
+                    
+                    <!-- Reply Button -->
+                    <button onclick="toggleReplyForm({{ comment.id }})" class="text-gray-500 dark:text-gray-400 hover:text-sponge-brown dark:hover:text-sponge-yellow transition-colors">
+                        <i class="fas fa-reply mr-1"></i>
+                        Reply
+                    </button>
+                {% else %}
+                    <div class="flex items-center space-x-1 text-gray-500 dark:text-gray-400">
+                        <i class="far fa-heart"></i>
+                        <span>{{ comment.likes_count }}</span>
+                    </div>
+                {% endif %}
+                
+                <!-- Comment ID for reference -->
+                <span class="text-xs text-gray-400 dark:text-gray-500">
+                    #{{ comment.id }}
+                </span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Reply Form (Hidden by default) -->
+    {% if user.is_authenticated %}
+        <div id="reply-form-{{ comment.id }}" class="hidden mt-4 ml-14">
+            <form method="post" action="{% url 'blog:add_comment' post.slug %}" class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                {% csrf_token %}
+                <input type="hidden" name="parent_id" value="{{ comment.id }}">
+                <div class="flex items-start space-x-3">
+                    <img src="{{ user.profile.get_avatar_url }}" alt="{{ user.username }}" class="w-8 h-8 rounded-full object-cover">
+                    <div class="flex-1">
+                        <textarea name="content" rows="3" placeholder="Write a reply..." class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-sponge-yellow dark:bg-gray-600 dark:text-white resize-none" required></textarea>
+                        <div class="mt-2 flex items-center space-x-2">
+                            <button type="submit" class="bg-sponge-yellow hover:bg-sponge-light text-sponge-brown px-4 py-1 rounded-md font-medium transition-colors text-sm">
+                                Reply
+                            </button>
+                            <button type="button" onclick="toggleReplyForm({{ comment.id }})" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors text-sm">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    {% endif %}
+    
+    <!-- Nested Replies -->
+    {% if comment.replies.all %}
+        <div class="ml-14 mt-4 space-y-4">
+            {% for reply in comment.replies.all %}
+                <div class="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-4">
+                    <div class="flex items-start space-x-3">
+                        <a href="{% url 'blog:user_profile' reply.author.username %}" class="flex-shrink-0">
+                            <img src="{{ reply.author.profile.get_avatar_url }}" alt="{{ reply.author.username }}" class="w-8 h-8 rounded-full object-cover border border-sponge-yellow">
+                        </a>
+                        
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-2">
+                                <a href="{% url 'blog:user_profile' reply.author.username %}" class="font-semibold text-gray-900 dark:text-white hover:text-sponge-brown dark:hover:text-sponge-yellow transition-colors text-sm">
+                                    {{ reply.author.first_name }} {{ reply.author.last_name|default:reply.author.username }}
+                                </a>
+                                <span class="text-gray-500 dark:text-gray-400 text-xs">
+                                    {{ reply.created_at|timesince }} ago
+                                </span>
+                            </div>
+                            
+                            <div class="prose prose-sm dark:prose-invert max-w-none text-sm">
+                                {{ reply.content|linebreaks }}
+                            </div>
+                            
+                            <div class="flex items-center space-x-3 mt-2">
+                                {% if user.is_authenticated %}
+                                    <button onclick="likeComment({{ reply.id }})" id="comment-like-{{ reply.id }}" class="flex items-center space-x-1 text-gray-500 dark:text-gray-400 hover:text-red-500 transition-colors text-sm">
+                                        <i id="comment-like-icon-{{ reply.id }}" class="far fa-heart"></i>
+                                        <span id="comment-like-count-{{ reply.id }}">{{ reply.likes_count }}</span>
+                                    </button>
+                                {% else %}
+                                    <div class="flex items-center space-x-1 text-gray-500 dark:text-gray-400 text-sm">
+                                        <i class="far fa-heart"></i>
+                                        <span>{{ reply.likes_count }}</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+
+<script>
+function toggleReplyForm(commentId) {
+    const form = document.getElementById(`reply-form-${commentId}`);
+    form.classList.toggle('hidden');
+    
+    if (!form.classList.contains('hidden')) {
+        // Focus on textarea when showing form
+        const textarea = form.querySelector('textarea');
+        textarea.focus();
+    }
+}
+
+async function likeComment(commentId) {
+    try {
+        const response = await fetch(`/ajax/like-comment/${commentId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json',
+            },
+        });
+        
+        const data = await response.json();
+        const countElement = document.getElementById(`comment-like-count-${commentId}`);
+        const iconElement = document.getElementById(`comment-like-icon-${commentId}`);
+        const buttonElement = document.getElementById(`comment-like-${commentId}`);
+        
+        countElement.textContent = data.likes_count;
+        
+        if (data.liked) {
+            iconElement.className = 'fas fa-heart text-red-500';
+            buttonElement.classList.add('text-red-500');
+        } else {
+            iconElement.className = 'far fa-heart';
+            buttonElement.classList.remove('text-red-500');
+        }
+        
+        // Add animation
+        buttonElement.classList.add('animate-like');
+        setTimeout(() => buttonElement.classList.remove('animate-like'), 300);
+        
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+</script>

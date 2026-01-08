@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Profile - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+            Edit Your Profile
+        </h1>
+        <p class="text-gray-600 dark:text-gray-400">
+            Update your information and preferences
+        </p>
+    </div>
+
+    <!-- Form -->
+    <form method="post" enctype="multipart/form-data" class="bg-white dark:bg-gray-800 shadow-xl rounded-xl p-8">
+        {% csrf_token %}
+        
+        <div class="space-y-6">
+            <!-- Avatar Preview -->
+            <div class="text-center mb-6">
+                <div class="relative inline-block">
+                    <img id="avatar-preview" src="{{ user.profile.get_avatar_url }}" alt="{{ user.username }}" class="w-24 h-24 rounded-full object-cover border-4 border-sponge-yellow">
+                    <div class="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity cursor-pointer" onclick="document.getElementById('id_avatar').click()">
+                        <i class="fas fa-camera text-white text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Personal Information -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- First Name -->
+                <div>
+                    <label for="{{ form.first_name.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        First Name
+                    </label>
+                    {{ form.first_name }}
+                    {% if form.first_name.errors %}
+                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.first_name.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Last Name -->
+                <div>
+                    <label for="{{ form.last_name.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Last Name
+                    </label>
+                    {{ form.last_name }}
+                    {% if form.last_name.errors %}
+                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.last_name.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Email -->
+            <div>
+                <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Email Address
+                </label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.email.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Bio -->
+            <div>
+                <label for="{{ form.bio.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Bio
+                </label>
+                {{ form.bio }}
+                {% if form.bio.errors %}
+                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.bio.errors.0 }}</p>
+                {% endif %}
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Tell people a bit about yourself.</p>
+            </div>
+
+            <!-- Location -->
+            <div>
+                <label for="{{ form.location.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Location
+                </label>
+                {{ form.location }}
+                {% if form.location.errors %}
+                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.location.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Website -->
+            <div>
+                <label for="{{ form.website.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Website
+                </label>
+                {{ form.website }}
+                {% if form.website.errors %}
+                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.website.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Avatar Upload -->
+            <div>
+                <label for="{{ form.avatar.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Profile Picture
+                </label>
+                {{ form.avatar }}
+                {% if form.avatar.errors %}
+                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.avatar.errors.0 }}</p>
+                {% endif %}
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Upload a new profile picture (optional).</p>
+            </div>
+
+            <!-- Dark Mode -->
+            <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">Dark Mode</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Use dark theme across the site</p>
+                </div>
+                <div class="flex items-center">
+                    {{ form.dark_mode }}
+                    <label for="{{ form.dark_mode.id_for_label }}" class="ml-2">
+                        <span class="sr-only">Dark Mode</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-between">
+            <div class="flex gap-3">
+                <button type="submit" class="bg-sponge-yellow hover:bg-sponge-light text-sponge-brown px-6 py-3 rounded-lg font-semibold transition-all transform hover:scale-105 duration-200 flex items-center">
+                    <i class="fas fa-save mr-2"></i>
+                    Save Changes
+                </button>
+            </div>
+            
+            <div class="flex gap-3">
+                <a href="{% url 'blog:user_profile' user.username %}" class="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 px-6 py-3 rounded-lg font-semibold transition-colors flex items-center">
+                    <i class="fas fa-times mr-2"></i>
+                    Cancel
+                </a>
+            </div>
+        </div>
+    </form>
+
+    <!-- Account Security -->
+    <div class="mt-8 bg-white dark:bg-gray-800 shadow-xl rounded-xl p-8">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            <i class="fas fa-shield-alt mr-2 text-sponge-brown"></i>
+            Account Security
+        </h3>
+        <div class="space-y-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="font-medium text-gray-900 dark:text-white">Password</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Last changed: Never</p>
+                </div>
+                <button class="bg-sponge-yellow hover:bg-sponge-light text-sponge-brown px-4 py-2 rounded-lg font-medium transition-colors">
+                    Change Password
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Avatar preview
+document.getElementById('id_avatar').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('avatar-preview').src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+// Character counter for bio
+const bioField = document.getElementById('{{ form.bio.id_for_label }}');
+if (bioField) {
+    const maxLength = 500;
+    
+    function updateBioCounter() {
+        const length = bioField.value.length;
+        const remaining = maxLength - length;
+        
+        let counter = document.getElementById('bio-counter');
+        if (!counter) {
+            counter = document.createElement('p');
+            counter.id = 'bio-counter';
+            counter.className = 'mt-1 text-sm';
+            bioField.parentNode.appendChild(counter);
+        }
+        
+        counter.textContent = `${remaining} characters remaining`;
+        counter.className = `mt-1 text-sm ${remaining < 50 ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'}`;
+    }
+    
+    bioField.addEventListener('input', updateBioCounter);
+    updateBioCounter(); // Initial call
+}
+
+// Form validation
+document.querySelector('form').addEventListener('submit', function(e) {
+    const email = document.getElementById('{{ form.email.id_for_label }}').value;
+    const website = document.getElementById('{{ form.website.id_for_label }}').value;
+    
+    // Email validation
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        e.preventDefault();
+        alert('Please enter a valid email address.');
+        return;
+    }
+    
+    // Website validation
+    if (website && !website.startsWith('http://') && !website.startsWith('https://')) {
+        const confirmed = confirm('Website URL should start with http:// or https://. Do you want to add https:// automatically?');
+        if (confirmed) {
+            document.getElementById('{{ form.website.id_for_label }}').value = 'https://' + website;
+        }
+    }
+});
+</script>
+{% endblock %}
