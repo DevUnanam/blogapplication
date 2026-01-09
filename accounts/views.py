@@ -1,10 +1,11 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
+from django.views.decorators.http import require_http_methods
 from blog.forms import CustomUserCreationForm, UserProfileForm
 
 
@@ -52,6 +53,19 @@ def login_view(request):
         form = AuthenticationForm()
     
     return render(request, 'accounts/login.html', {'form': form})
+
+
+@require_http_methods(["GET", "POST"])
+def logout_view(request):
+    """
+    Custom logout view that handles both GET and POST requests
+    """
+    if request.user.is_authenticated:
+        username = request.user.username
+        logout(request)
+        messages.success(request, f'You have been logged out successfully. See you later, {username}!')
+    
+    return redirect('blog:home')
 
 
 @login_required
