@@ -1,6 +1,8 @@
 Django==5.0.6
 psycopg2-binary==2.9.7
-Pillow==10.3.0
+Pillow==9.5.0
 python-decouple==3.8
 whitenoise==6.5.0
 Faker==26.0.0
+gunicorn==21.2.0
+dj-database-url==2.1.0
