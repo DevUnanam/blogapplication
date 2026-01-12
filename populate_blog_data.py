@@ -38,21 +38,21 @@ from django.core.management import call_command
 def main():
     print("🌱 Blog Data Population Script")
     print("=" * 40)
-    
+
     # Parse command line arguments
     import argparse
     parser = argparse.ArgumentParser(description='Populate blog with sample data')
     parser.add_argument('--users', type=int, default=15, help='Number of users to create')
     parser.add_argument('--articles', type=int, default=50, help='Number of articles to create')
     parser.add_argument('--clear', action='store_true', help='Clear existing data')
-    
+
     args = parser.parse_args()
-    
+
     print(f"Users to create: {args.users}")
     print(f"Articles to create: {args.articles}")
     print(f"Clear existing data: {'Yes' if args.clear else 'No'}")
     print("-" * 40)
-    
+
     try:
         # Install Faker if not installed
         try:
@@ -62,28 +62,28 @@ def main():
             import subprocess
             subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'Faker==26.0.0'])
             print("✓ Faker installed successfully")
-        
+
         # Run the population command
-        call_command('populate_data', 
-                    users=args.users, 
-                    articles=args.articles, 
+        call_command('populate_data',
+                    users=args.users,
+                    articles=args.articles,
                     clear=args.clear)
-        
+
         print("\n🎉 Population completed successfully!")
         print("\nYou can now:")
         print("1. Run the Django server: python manage.py runserver")
         print("2. Visit your blog and see the populated content")
         print("3. Login with any created user (password: 'test')")
-        
+
     except Exception as e:
         print(f"\n❌ Error during population: {e}")
         print("\nTroubleshooting tips:")
         print("1. Make sure you've run: python manage.py migrate")
         print("2. Ensure all requirements are installed: pip install -r requirements.txt")
         print("3. Check that your database is accessible")
-        
+
         return 1
-    
+
     return 0
 
 

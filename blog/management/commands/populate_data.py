@@ -39,16 +39,16 @@ class Command(BaseCommand):
 
         # Ensure genres exist
         self.create_genres()
-        
+
         # Create users
         users = self.create_users(options['users'])
-        
+
         # Create articles
         self.create_articles(users, options['articles'])
-        
+
         # Create social interactions
         self.create_social_interactions(users)
-        
+
         self.stdout.write(
             self.style.SUCCESS(f'✅ Successfully populated database with {options["users"]} users and {options["articles"]} articles!')
         )
@@ -56,16 +56,16 @@ class Command(BaseCommand):
     def clear_existing_data(self):
         """Clear existing data except superusers"""
         self.stdout.write('🗑️ Clearing existing data...')
-        
+
         # Clear posts and related data
         Post.objects.all().delete()
         Comment.objects.all().delete()
         PostLike.objects.all().delete()
         Follow.objects.all().delete()
-        
+
         # Clear regular users (keep superusers)
         User.objects.filter(is_superuser=False).delete()
-        
+
         self.stdout.write('✓ Existing data cleared')
 
     def create_genres(self):
@@ -87,7 +87,7 @@ class Command(BaseCommand):
             {'name': 'Science', 'description': 'Scientific discoveries and research'},
             {'name': 'Art & Culture', 'description': 'Creative arts, cultural discussions, and history'},
         ]
-        
+
         for genre_data in genres_data:
             Genre.objects.get_or_create(
                 name=genre_data['name'],
@@ -97,7 +97,7 @@ class Command(BaseCommand):
     def create_users(self, count):
         """Create diverse users with profiles"""
         self.stdout.write(f'👥 Creating {count} users...')
-        
+
         # Predefined user data for more realistic profiles
         user_templates = [
             {'first_name': 'Sarah', 'last_name': 'Johnson', 'profession': 'Tech Writer', 'interests': ['Technology', 'Science']},
@@ -116,9 +116,9 @@ class Command(BaseCommand):
             {'first_name': 'Kevin', 'last_name': 'Jackson', 'profession': 'Science Writer', 'interests': ['Science', 'Education']},
             {'first_name': 'Megan', 'last_name': 'Harris', 'profession': 'Life Coach', 'interests': ['Lifestyle', 'Personal Stories']},
         ]
-        
+
         created_users = []
-        
+
         for i in range(count):
             if i < len(user_templates):
                 template = user_templates[i]
@@ -129,10 +129,10 @@ class Command(BaseCommand):
                 first_name = self.fake.first_name()
                 last_name = self.fake.last_name()
                 profession = self.fake.job()
-            
+
             username = f"{first_name.lower()}_{last_name.lower()}"
             email = f"{username}@example.com"
-            
+
             # Create user
             user, created = User.objects.get_or_create(
                 username=username,
@@ -145,7 +145,7 @@ class Command(BaseCommand):
                     'date_joined': timezone.make_aware(self.fake.date_time_between(start_date='-2y', end_date='now')),
                 }
             )
-            
+
             if created:
                 # Create user profile
                 bio_templates = [
@@ -155,7 +155,7 @@ class Command(BaseCommand):
                     f"Experienced {profession.lower()} with a love for storytelling.",
                     f"Join me as I explore life as a {profession.lower()} and share my journey.",
                 ]
-                
+
                 profile, _ = UserProfile.objects.get_or_create(
                     user=user,
                     defaults={
@@ -165,24 +165,24 @@ class Command(BaseCommand):
                         'dark_mode': random.choice([True, False]),
                     }
                 )
-                
+
                 created_users.append(user)
                 self.stdout.write(f'  ✓ Created user: {user.username}')
             else:
                 created_users.append(user)
                 self.stdout.write(f'  - User already exists: {user.username}')
-        
+
         return created_users
 
     def create_articles(self, users, count):
         """Create diverse articles across all genres"""
         self.stdout.write(f'📝 Creating {count} articles...')
-        
+
         genres = list(Genre.objects.all())
         if not genres:
             self.stdout.write(self.style.ERROR('No genres found! Please run setup_blog command first.'))
             return
-        
+
         # Article templates for different genres
         article_templates = {
             'Technology': [
@@ -221,7 +221,7 @@ class Command(BaseCommand):
                 ('Cryptocurrency Explained', 'A beginner\'s guide to digital currencies and blockchain technology.'),
             ],
         }
-        
+
         # Generate additional generic templates for other genres
         generic_templates = [
             ('Lessons Learned', 'Reflecting on important life experiences and the wisdom they provide.'),
@@ -230,25 +230,25 @@ class Command(BaseCommand):
             ('Finding Your Voice', 'Discovering your unique perspective and sharing it with the world.'),
             ('Innovation and Creativity', 'Exploring new ideas and thinking outside the box.'),
         ]
-        
+
         created_articles = 0
-        
+
         for i in range(count):
             # Select random author and genre
             author = random.choice(users)
             genre = random.choice(genres)
-            
+
             # Get article template
             if genre.name in article_templates:
                 template = random.choice(article_templates[genre.name])
             else:
                 template = random.choice(generic_templates)
-            
+
             title_base, content_base = template
-            
+
             # Add variation to avoid duplicates
             title = f"{title_base}: A {random.choice(['Personal', 'Professional', 'Deep', 'Comprehensive', 'Practical'])} Perspective"
-            
+
             # Generate comprehensive content
             content_parts = [
                 content_base,
@@ -257,13 +257,13 @@ class Command(BaseCommand):
                 "\n\n" + "What are your thoughts on this topic? I'd love to hear your experiences in the comments below!",
             ]
             content = "".join(content_parts)
-            
+
             # Create the post with varied creation dates
             creation_date = timezone.make_aware(self.fake.date_time_between(
-                start_date='-6m', 
+                start_date='-6m',
                 end_date='now'
             ))
-            
+
             try:
                 post = Post.objects.create(
                     title=title,
@@ -274,26 +274,26 @@ class Command(BaseCommand):
                     updated_at=creation_date + timedelta(hours=random.randint(0, 48)),
                     is_published=True,
                 )
-                
+
                 created_articles += 1
                 if created_articles <= 10:  # Show first 10 for brevity
                     self.stdout.write(f'  ✓ Created: "{post.title}" by {author.username}')
                 elif created_articles == 11:
                     self.stdout.write('  ... (continuing to create more articles)')
-                
+
             except Exception as e:
                 self.stdout.write(f'  ❌ Failed to create article: {e}')
-        
+
         self.stdout.write(f'✅ Created {created_articles} articles successfully!')
 
     def create_social_interactions(self, users):
         """Create follows, likes, and comments for realistic social interaction"""
         self.stdout.write('🤝 Creating social interactions...')
-        
+
         posts = list(Post.objects.all())
         if not posts:
             return
-        
+
         # Create follow relationships
         follow_count = 0
         for user in users[:12]:  # Not all users need to follow everyone
@@ -306,7 +306,7 @@ class Command(BaseCommand):
                 )
                 if created:
                     follow_count += 1
-        
+
         # Create post likes
         like_count = 0
         for post in posts:
@@ -320,7 +320,7 @@ class Command(BaseCommand):
                     )
                     if created:
                         like_count += 1
-        
+
         # Create comments
         comment_count = 0
         comment_templates = [
@@ -335,12 +335,12 @@ class Command(BaseCommand):
             "I learned something new. Thank you for this!",
             "Well researched and thoughtfully written.",
         ]
-        
+
         for post in random.sample(posts, k=min(30, len(posts))):  # Add comments to 30 random posts
             # Each selected post gets 1-5 comments
             num_comments = random.randint(1, 5)
             commenters = random.sample([u for u in users if u != post.author], k=min(num_comments, len(users)-1))
-            
+
             for commenter in commenters:
                 comment = Comment.objects.create(
                     post=post,
@@ -351,7 +351,7 @@ class Command(BaseCommand):
                     )
                 )
                 comment_count += 1
-        
+
         self.stdout.write(f'  ✓ Created {follow_count} follow relationships')
         self.stdout.write(f'  ✓ Created {like_count} post likes')
         self.stdout.write(f'  ✓ Created {comment_count} comments')

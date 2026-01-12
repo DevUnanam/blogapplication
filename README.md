@@ -150,7 +150,7 @@ Visit `http://127.0.0.1:8000` to see your blog in action! 🎉
 The setup command creates these 15 genres:
 
 1. **Sports** - Sports news, analysis, and personal stories
-2. **Comedy** - Funny stories, jokes, and humorous content  
+2. **Comedy** - Funny stories, jokes, and humorous content
 3. **Technology** - Tech news, tutorials, and innovation
 4. **Politics** - Political analysis and current affairs
 5. **Lifestyle** - Life tips, habits, and personal development
@@ -219,7 +219,7 @@ tailwind.config = {
 The modular structure makes it easy to extend:
 
 - Add new models in `blog/models.py`
-- Create new views in `blog/views.py` 
+- Create new views in `blog/views.py`
 - Add URL patterns in `blog/urls.py`
 - Create new templates in `templates/blog/`
 - Add JavaScript functionality in `static/js/main.js`

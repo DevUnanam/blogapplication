@@ -18,7 +18,7 @@
     <!-- Form -->
     <form method="post" enctype="multipart/form-data" class="bg-white dark:bg-gray-800 shadow-xl rounded-xl p-8">
         {% csrf_token %}
-        
+
         <div class="space-y-6">
             <!-- Avatar Preview -->
             <div class="text-center mb-6">
@@ -135,7 +135,7 @@
                     Save Changes
                 </button>
             </div>
-            
+
             <div class="flex gap-3">
                 <a href="{% url 'blog:user_profile' user.username %}" class="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 px-6 py-3 rounded-lg font-semibold transition-colors flex items-center">
                     <i class="fas fa-times mr-2"></i>
@@ -184,11 +184,11 @@ document.getElementById('id_avatar').addEventListener('change', function(e) {
 const bioField = document.getElementById('{{ form.bio.id_for_label }}');
 if (bioField) {
     const maxLength = 500;
-    
+
     function updateBioCounter() {
         const length = bioField.value.length;
         const remaining = maxLength - length;
-        
+
         let counter = document.getElementById('bio-counter');
         if (!counter) {
             counter = document.createElement('p');
@@ -196,11 +196,11 @@ if (bioField) {
             counter.className = 'mt-1 text-sm';
             bioField.parentNode.appendChild(counter);
         }
-        
+
         counter.textContent = `${remaining} characters remaining`;
         counter.className = `mt-1 text-sm ${remaining < 50 ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'}`;
     }
-    
+
     bioField.addEventListener('input', updateBioCounter);
     updateBioCounter(); // Initial call
 }
@@ -209,14 +209,14 @@ if (bioField) {
 document.querySelector('form').addEventListener('submit', function(e) {
     const email = document.getElementById('{{ form.email.id_for_label }}').value;
     const website = document.getElementById('{{ form.website.id_for_label }}').value;
-    
+
     // Email validation
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         e.preventDefault();
         alert('Please enter a valid email address.');
         return;
     }
-    
+
     // Website validation
     if (website && !website.startsWith('http://') && !website.startsWith('https://')) {
         const confirmed = confirm('Website URL should start with http:// or https://. Do you want to add https:// automatically?');

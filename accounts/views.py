@@ -15,12 +15,12 @@ class RegisterView(CreateView):
     form_class = CustomUserCreationForm
     template_name = 'accounts/register.html'
     success_url = reverse_lazy('blog:home')
-    
+
     def form_valid(self, form):
         response = super().form_valid(form)
         username = form.cleaned_data.get('username')
         messages.success(self.request, f'Welcome {username}! Your account has been created successfully.')
-        
+
         # Log the user in after registration
         user = authenticate(
             username=form.cleaned_data['username'],
@@ -28,7 +28,7 @@ class RegisterView(CreateView):
         )
         if user:
             login(self.request, user)
-        
+
         return response
 
 
@@ -50,7 +50,7 @@ def login_view(request):
             messages.error(request, 'Invalid username or password.')
     else:
         form = CustomAuthenticationForm()
-    
+
     return render(request, 'accounts/login.html', {'form': form})
 
 
@@ -63,7 +63,7 @@ def logout_view(request):
         username = request.user.username
         logout(request)
         messages.success(request, f'You have been logged out successfully. See you later, {username}!')
-    
+
     return redirect('blog:home')
 
 
@@ -80,5 +80,5 @@ def edit_profile(request):
             return redirect('blog:user_profile', username=request.user.username)
     else:
         form = UserProfileForm(instance=request.user.profile, user=request.user)
-    
+
     return render(request, 'accounts/edit_profile.html', {'form': form})
