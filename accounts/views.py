@@ -1,12 +1,11 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
 from django.views.decorators.http import require_http_methods
-from blog.forms import CustomUserCreationForm, UserProfileForm
+from blog.forms import CustomUserCreationForm, UserProfileForm, CustomAuthenticationForm
 
 
 class RegisterView(CreateView):
@@ -38,7 +37,7 @@ def login_view(request):
     User login view
     """
     if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
+        form = CustomAuthenticationForm(request, data=request.POST)
         if form.is_valid():
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
@@ -50,7 +49,7 @@ def login_view(request):
         else:
             messages.error(request, 'Invalid username or password.')
     else:
-        form = AuthenticationForm()
+        form = CustomAuthenticationForm()
     
     return render(request, 'accounts/login.html', {'form': form})
 

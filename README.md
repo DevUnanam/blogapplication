@@ -107,7 +107,37 @@ python manage.py setup_blog --create-superuser --create-sample-data
 python manage.py setup_blog
 ```
 
-### 4. Run the Development Server
+### 4. Populate with Sample Data (Optional)
+
+For testing and development, you can populate your blog with realistic sample data:
+
+```bash
+# Install Faker library for generating sample data
+pip install Faker==26.0.0
+
+# Populate with 15 users and 50 articles (default)
+python manage.py populate_data
+
+# Custom amounts
+python manage.py populate_data --users 20 --articles 100
+
+# Clear existing data and repopulate
+python manage.py populate_data --clear --users 15 --articles 50
+
+# Alternative: Use the convenient Python script
+python populate_blog_data.py
+python populate_blog_data.py --users 20 --articles 75
+```
+
+This will create:
+- **15 diverse users** with realistic profiles and bios
+- **50 articles** across all genres with engaging content
+- **Social interactions**: follows, likes, and comments
+- **Varied timestamps**: Content spread over the last 6 months
+
+All generated users have the password `test` for easy testing.
+
+### 5. Run the Development Server
 
 ```bash
 python manage.py runserver

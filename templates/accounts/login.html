@@ -17,23 +17,20 @@
                 Welcome back!
             </h2>
             <p class="text-sponge-dark dark:text-gray-300">
-                Sign in to your account to continue writing and reading amazing stories.
+                Sign in to your account
             </p>
         </div>
 
         <!-- Login Form -->
         <form method="post" class="bg-white dark:bg-gray-800 shadow-xl rounded-xl p-8 space-y-6">
             {% csrf_token %}
-            
+
             <!-- Username -->
             <div>
                 <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Username
                 </label>
                 <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i class="fas fa-user text-gray-400"></i>
-                    </div>
                     {{ form.username }}
                 </div>
                 {% if form.username.errors %}
@@ -47,9 +44,6 @@
                     Password
                 </label>
                 <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i class="fas fa-lock text-gray-400"></i>
-                    </div>
                     {{ form.password }}
                 </div>
                 {% if form.password.errors %}
@@ -60,9 +54,6 @@
             <!-- Submit Button -->
             <div>
                 <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-sponge-brown bg-sponge-yellow hover:bg-sponge-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sponge-yellow transition-all transform hover:scale-105 duration-200">
-                    <span class="absolute left-0 inset-y-0 flex items-center pl-3">
-                        <i class="fas fa-sign-in-alt group-hover:text-sponge-dark"></i>
-                    </span>
                     Sign in
                 </button>
             </div>
@@ -77,13 +68,6 @@
                 </p>
             </div>
         </form>
-
-        <!-- Alternative Actions -->
-        <div class="text-center">
-            <a href="{% url 'blog:home' %}" class="text-sm text-gray-500 dark:text-gray-400 hover:text-sponge-brown dark:hover:text-sponge-yellow transition-colors">
-                ← Back to home
-            </a>
-        </div>
     </div>
 </div>
 {% endblock %}
