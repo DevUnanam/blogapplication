@@ -76,12 +76,13 @@ WSGI_APPLICATION = 'tori_blog.wsgi.application'
 
 # Default to SQLite for development, but can be overridden with environment variables
 DATABASES = {
-    'default': dj_database_url.config(
-        default=config('DATABASE_URL', default=None),
+    "default": dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
         conn_max_age=600,
-        ssl_require=True
+        ssl_require=not DEBUG,
     )
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
